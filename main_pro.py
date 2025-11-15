@@ -7,6 +7,8 @@ from config import settings
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os, docling
 import pandas as pd
+from docling.pipeline.standard_pdf_pipeline import StandardPdfPipelineOptions
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -99,9 +101,16 @@ with tab1:
                 
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
+                
+                pdf_options = StandardPdfPipelineOptions(
+                    do_ocr=False,
+                    ocr_options=None,
+                    accelerator_options=None
+                )
+                
                 loader = DoclingLoader(
                     file_path=temp_path,
-                 
+                    convert_options={"pdf": pdf_options},
                     export_type=ExportType.MARKDOWN
                 )
 
@@ -407,6 +416,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
