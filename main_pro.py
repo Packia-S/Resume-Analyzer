@@ -5,7 +5,7 @@ from langchain_docling.loader import ExportType
 from schema import Profile
 from config import settings
 from langchain_google_genai import ChatGoogleGenerativeAI
-import os, time
+import os, docling
 import pandas as pd
 from dotenv import load_dotenv
 from docling.pipeline.options import PdfPipelineOptions
@@ -97,14 +97,15 @@ with tab1:
                 temp_path = f"temp_{uploaded_file.name}"
                 with open(temp_path, "wb") as f:
                     f.write(uploaded_file.read())
-                pdf_options = StandardPdfPipelineOptions(do_ocr=False)
+                pdf_options = PdfPipelineOptions(do_ocr=False)
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 loader = DoclingLoader(
-                    uploaded_file,
-                    loader_options={"pdf": pdf_options}
+                    file_path=temp_path,
+                    convert_options={"pdf": pdf_options},
+                    export_type=ExportType.MARKDOWN
                 )
-                
+
                 docs = loader.load()
                 resume_text = docs[0].page_content
                
@@ -407,7 +408,6 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
-
 
 
 
