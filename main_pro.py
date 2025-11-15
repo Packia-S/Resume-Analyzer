@@ -8,6 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import os, time
 import pandas as pd
 from dotenv import load_dotenv
+from docling.document_converter import PdfOptions
 
 load_dotenv()
 
@@ -96,10 +97,14 @@ with tab1:
                 temp_path = f"temp_{uploaded_file.name}"
                 with open(temp_path, "wb") as f:
                     f.write(uploaded_file.read())
+                pdf_options = PdfOptions(do_ocr=False)
 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
-                loader = DoclingLoader(uploaded_file, convert_options={"do_ocr": False})
-
+                loader = DoclingLoader(
+                    uploaded_file,
+                    loader_options={"pdf": pdf_options}
+                )
+                
                 docs = loader.load()
                 resume_text = docs[0].page_content
                
@@ -402,5 +407,6 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
