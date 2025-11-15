@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-icon = Image.open("D:/VRNeXGen/langchain/project_vrnexgen/logo.png")
+icon = Image.open("logo.png")
 
 st.set_page_config(
     page_title = "VRNeXGen",
@@ -396,4 +396,5 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
