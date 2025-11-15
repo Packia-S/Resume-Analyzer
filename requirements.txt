@@ -41,3 +41,6 @@ numpy==2.2.6
 pypdfium2==4.30.0
 pypdf==5.7.0
 langchain-text-splitters==0.3.11
+docling[pipeline]>=1.4.0
+
+
