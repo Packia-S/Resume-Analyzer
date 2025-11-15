@@ -9,6 +9,8 @@ import os
 import docling
 import pandas as pd
 from docling.pipeline.standard_pdf_pipeline import StandardPdfPipelineOptions
+from docling.document_converter import PdfOptions
+
 
 from dotenv import load_dotenv
 
@@ -103,12 +105,8 @@ with tab1:
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 
-                pdf_options = StandardPdfPipelineOptions(
-                    do_ocr=False,
-                    ocr_options=None,
-                    accelerator_options=None
-                )
-                
+                pdf_options = PdfOptions(do_ocr=False)      # IMPORTANT FIX
+
                 loader = DoclingLoader(
                     file_path=temp_path,
                     convert_options={"pdf": pdf_options},
@@ -417,6 +415,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
