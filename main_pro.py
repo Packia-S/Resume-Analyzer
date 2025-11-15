@@ -8,7 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import os, time
 import pandas as pd
 from dotenv import load_dotenv
-from docling.pipeline.standard_pdf_pipeline import StandardPdfPipelineOptions
+from docling.pipeline.options import PdfPipelineOptions
 
 load_dotenv()
 
@@ -407,6 +407,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
