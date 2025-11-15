@@ -83,7 +83,11 @@ tab1, tab2 = st.tabs(
 csv_file = "resume_output.csv"
 
 with tab1:
-    uploaded_file = st.file_uploader("Choose a file")
+    st.header("Upload Resume")
+    uploaded_file = st.file_uploader(
+        "Choose a file",
+        type = ["pdf", "docx"]
+    )
     if uploaded_file:
         st.success("📄Resume Uploaded")
 
