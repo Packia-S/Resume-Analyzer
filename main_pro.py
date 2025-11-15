@@ -97,7 +97,9 @@ with tab1:
                 with open(temp_path, "wb") as f:
                     f.write(uploaded_file.read())
 
-                loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
+                # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
+                loader = DoclingLoader(uploaded_file, convert_options={"do_ocr": False})
+
                 docs = loader.load()
                 resume_text = docs[0].page_content
                
