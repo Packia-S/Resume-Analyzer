@@ -35,7 +35,18 @@ from dotenv import load_dotenv
 # docling conversion classes (we use DocumentConverter with do_ocr=False)
 from docling.document_converter import DocumentConverter
 from docling.datamodel.pipeline_options import PdfPipelineOptions
-from langchain_core.schema import Document as LC_Document
+# from langchain_core.schema import Document as LC_Document
+
+
+try:
+    from langchain_core.schema import Document as LC_Document
+except Exception:
+    try:
+        from langchain.schema import Document as LC_Document
+    except Exception:
+        class LC_Document:
+            def __init__(self, page_content: str):
+                self.page_content = page_content
 
 load_dotenv()
 
@@ -474,6 +485,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
