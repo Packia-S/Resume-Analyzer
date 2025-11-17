@@ -14,6 +14,7 @@ import os
 import docling
 import pandas as pd
 from dotenv import load_dotenv
+import tempfile
 
 load_dotenv()
 
@@ -99,10 +100,13 @@ with tab1:
 
         if st.button("Convert"):
             with st.spinner("Extracting Information..."):
-                temp_path = f"temp_{uploaded_file.name}"
-                with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.read())
-                
+                # temp_path = f"temp_{uploaded_file.name}"
+                # with open(temp_path, "wb") as f:
+                #     f.write(uploaded_file.read())
+                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{uploaded_file.name}") as tmp:
+                    tmp.write(uploaded_file.read())
+                    temp_path = tmp.name
+                                
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 # loader = DoclingLoader(
@@ -424,6 +428,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
