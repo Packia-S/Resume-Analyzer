@@ -106,10 +106,10 @@ with tab1:
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 loader = DoclingLoader(
-                    file_path=temp_path,
+                    temp_path,
                  
                     export_type=ExportType.MARKDOWN,
-                    do_ocrn= False
+                    do_ocr = False
                 )
 
                 docs = loader.load()
@@ -414,6 +414,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
