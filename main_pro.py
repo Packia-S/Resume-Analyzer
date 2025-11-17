@@ -105,12 +105,22 @@ with tab1:
                 
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
-                loader = DoclingLoader(
-                    temp_path,
-                 
-                    export_type=ExportType.MARKDOWN,
-                   
-                )
+                # loader = DoclingLoader(
+                #     temp_path,                 
+                #     export_type=ExportType.MARKDOWN,
+                # )
+                try:
+                    loader = DoclingLoader(
+                        temp_path,
+                        export_type=ExportType.MARKDOWN
+                    )
+                    docs = loader.load()
+                    resume_markdown = docs[0].page_content
+                
+                except Exception as e:
+                    show_error(e)
+                    st.error("An internal error occurred.")
+
 
                 docs = loader.load()
                 resume_text = docs[0].page_content
@@ -414,6 +424,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
