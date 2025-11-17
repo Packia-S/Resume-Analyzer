@@ -109,7 +109,7 @@ with tab1:
                     temp_path,
                  
                     export_type=ExportType.MARKDOWN,
-                    ocr = False
+                   
                 )
 
                 docs = loader.load()
@@ -414,6 +414,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
