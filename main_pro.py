@@ -3,6 +3,8 @@ import os
 # FIX: Prevent HuggingFace from creating symlinks on Windows
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
 os.environ["DOC_LING_DISABLE_OCR"] = "1"
+os.environ["RAPIDOCR_DISABLE_OCR"] = "1"
+
 import streamlit as st
 from PIL import Image
 from langchain_docling import DoclingLoader
@@ -421,6 +423,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
