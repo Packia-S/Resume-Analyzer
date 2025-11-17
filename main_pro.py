@@ -1,3 +1,8 @@
+import os
+
+# FIX: Prevent HuggingFace from creating symlinks on Windows
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+
 import streamlit as st
 from PIL import Image
 from langchain_docling import DoclingLoader
@@ -5,13 +10,9 @@ from langchain_docling.loader import ExportType
 from schema import Profile
 from config import settings
 from langchain_google_genai import ChatGoogleGenerativeAI
-import os
+import os 
 import docling
 import pandas as pd
-# from docling.pipeline.standard_pdf_pipeline import StandardPdfPipelineOptions
-from docling.document_converter import PdfOptions
-
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -104,12 +105,9 @@ with tab1:
                 
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
-                
-                pdf_options = PdfOptions(do_ocr=False)      # IMPORTANT FIX
-
                 loader = DoclingLoader(
                     file_path=temp_path,
-                    convert_options={"pdf": pdf_options},
+                 
                     export_type=ExportType.MARKDOWN
                 )
 
@@ -415,10 +413,6 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
-
-
-
-
 
 
 
