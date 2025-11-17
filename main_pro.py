@@ -13,7 +13,6 @@ from schema import Profile
 from config import settings
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os 
-import docling
 import pandas as pd
 from dotenv import load_dotenv
 
@@ -423,6 +422,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
