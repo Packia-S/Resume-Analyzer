@@ -424,8 +424,6 @@
 
 
 import os
-
-# Prevent HuggingFace from creating symlinks on Windows
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
 
 import streamlit as st
@@ -522,7 +520,7 @@ with tab1:
 
                 docs = loader.load()
                 resume_text = docs[0].page_content
-                st.markdown(resume_text)
+                
 
             with st.spinner("Generating Insights..."):
                 llm = ChatGoogleGenerativeAI(
@@ -535,6 +533,18 @@ with tab1:
                 response = structured_llm.invoke(resume_text)
 
             data = response.model_dump()
+
+            tech = data.get("technical_skills", [{}])[0]
+            
+            all_skills = (
+                tech.get("programming_languages", []) +
+                tech.get("libraries_or_frameworks", []) +
+                tech.get("other_tools", []) +
+                data.get('interpersonal_skills', [])
+            )
+            
+            # Add the new 'skills' column to the dictionary
+            data["skills"] = all_skills
 
             # Display Personal Details
             st.markdown(f"""
@@ -549,7 +559,7 @@ with tab1:
             """, unsafe_allow_html=True)
 
             # Technical Skills
-            tech = data.get("technical_skills", [{}])[0]
+            # tech = data.get("technical_skills", [{}])[0]
             prog_langs = tech.get("programming_languages", [])
             frameworks = tech.get("libraries_or_frameworks", [])
             tools = tech.get("other_tools", [])
@@ -597,15 +607,21 @@ with tab2:
     if os.path.exists(csv_file):
         df = pd.read_csv(csv_file)
         st.title("🔍 Skills Filtering")
-        skill_data = df["skills"].apply(lambda x: eval(x) if isinstance(x, str) else x)
-        skill_list = [skill for skills in skill_data for skill in skills]
-        all_skill_details = sorted(set(skill_list))
-        selected_skills = st.multiselect("Select one or more skills", all_skill_details)
-        if selected_skills:
-            filtered_df = df[df['skills'].apply(lambda skill_set: all(skill in skill_set for skill in selected_skills))]
-        else:
-            filtered_df = df
-        st.dataframe(filtered_df)
+        try:
+          skill_data = df["skills"].apply(lambda x: eval(x) if isinstance(x, str) else x)
+          skill_list = [skill for skills in skill_data for skill in skills]
+          all_skill_details = sorted(set(skill_list))
+          selected_skills = st.multiselect("Select one or more skills", all_skill_details)
+          if selected_skills:
+              filtered_df = df[df['skills'].apply(lambda skill_set: all(skill in skill_set for skill in selected_skills))]
+          else:
+              filtered_df = df
+        except Exception as e:
+          st.error(f"Error reading skills data. Please ensure the data in `resume_output.csv` is correctly formatted: {e}")
+  else:
+    st.info("The `resume_output.csv` file has not been created yet. Please upload and save a resume in the 'Resume Upload' tab first.")
+        # st.dataframe(filtered_df)
+
 
 
 
