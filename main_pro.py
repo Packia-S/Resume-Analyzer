@@ -426,16 +426,12 @@
 
 
 import os
-
-# --- FIX: Disable ALL OCR so Docling never loads RapidOCR models ---
-os.environ["DOCLING_DISABLE_OCR"] = "1"
-os.environ["RAPIDOCR_DISABLE_OCR"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
 
 import streamlit as st
 from PIL import Image
-from langchain_docling import DoclingLoader
-from langchain_docling.loader import ExportType
+import fitz  # PyMuPDF
+import docx
 from schema import Profile
 from config import settings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -444,213 +440,97 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# App icon
 icon = Image.open("logo.png")
 
-# PAGE CONFIG
-st.set_page_config(page_title="VRNeXGen", page_icon=icon, layout="wide")
+st.set_page_config(
+    page_title="VRNeXGen",
+    page_icon=icon,
+    layout="wide",
+)
 
-# HEADER
-st.markdown("""
-<h1 style='font-size: 46px; display: flex; align-items: center;'>
-    <span style='color:#800000;'>VR</span>NeXGen
-</h1>
-<h8>Modernize 🔺 Automate 🔺 Innovate</h8>
-""", unsafe_allow_html=True)
+def extract_text_from_pdf(path):
+    text = ""
+    pdf = fitz.open(path)
+    for page in pdf:
+        text += page.get_text()
+    pdf.close()
+    return text
 
-# CSS
-st.markdown("""
-<style>
-.box {
-    padding: 18px;
-    border-radius: 12px;
-    margin: 15px 0;
-    background: #f1f5f9;
-    border-left: 5px solid #2563eb;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.08);
-}
-.title {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 6px;
-}
-</style>
-""", unsafe_allow_html=True)
+def extract_text_from_docx(path):
+    doc = docx.Document(path)
+    return "\n".join([p.text for p in doc.paragraphs])
 
 
-# ---------------- DIALOG FOR DUPLICATE EMAIL -------------------
+st.header("Upload Resume")
 
-@st.dialog("Duplicate Email Found")
-def show_overwrite_dialog(email, data, csv_file):
-    st.write(f"An entry with email **{email}** already exists.")
-    st.write("What would you like to do?")
+uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
 
-    col1, col2 = st.columns(2)
+if uploaded_file:
+    st.success("📄 Resume Uploaded")
 
-    with col1:
-        if st.button("Overwrite Existing"):
-            df = pd.read_csv(csv_file)
-            df = df[df["email_id"] != email]
-            df_new = pd.DataFrame([data])
-            df = pd.concat([df, df_new], ignore_index=True)
-            df.to_csv(csv_file, index=False)
-            st.success("Overwritten successfully!")
-            st.rerun()
+    if st.button("Convert"):
+        ext = uploaded_file.name.split(".")[-1]
+        temp_path = f"resume.{ext}"
 
-    with col2:
-        if st.button("Cancel"):
-            st.warning("Cancelled.")
-            st.rerun()
+        with open(temp_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
 
+        # ---------------------------
+        # 🔥 NO DOCLING – SAFE EXTRACTION
+        # ---------------------------
+        if ext == "pdf":
+            resume_text = extract_text_from_pdf(temp_path)
+        else:
+            resume_text = extract_text_from_docx(temp_path)
 
-# -----------------------------------------------------------------
+        st.subheader("Extracted Resume Text")
+        st.write(resume_text)
 
-tab1, tab2 = st.tabs(["📃Resume Upload", "📋Filter Resume"])
+        # ---------------------------
+        # AI STRUCTURED OUTPUT
+        # ---------------------------
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash-lite",
+            temperature=0,
+            google_api_key=settings.google_api_key,
+        )
+
+        structured_llm = llm.with_structured_output(schema=Profile)
+
+        response = structured_llm.invoke(resume_text)
+
+        data = response.model_dump()
+
+        st.subheader("Extracted Information")
+        st.json(data)
+
+        st.session_state["resume_data"] = data
+
+        os.remove(temp_path)
+
+# ---------------------------
+# Save to CSV
+# ---------------------------
 csv_file = "resume_output.csv"
 
+if "resume_data" in st.session_state:
+    if st.button("Save"):
+        data = st.session_state["resume_data"]
 
-# =======================  TAB 1  ================================
+        df_new = pd.DataFrame([data])
 
-with tab1:
-    st.header("Upload Resume")
+        if os.path.exists(csv_file):
+            df = pd.read_csv(csv_file)
 
-    uploaded_file = st.file_uploader("Choose a file", type=["pdf", "docx"])
+            if not df[df["email_id"] == data["email_id"]].empty:
+                df = df[df["email_id"] != data["email_id"]]
 
-    if uploaded_file:
-        st.success("📄 Resume Uploaded")
+            df = pd.concat([df, df_new], ignore_index=True)
+            df.to_csv(csv_file, index=False)
+        else:
+            df_new.to_csv(csv_file, index=False)
 
-        if st.button("Convert"):
-            with st.spinner("Extracting Information..."):
-                
-                temp_path = "uploaded_resume." + uploaded_file.name.split(".")[-1]
-
-                with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-
-                # ---------------------------------------------------------
-                # 🔥 Fixed DoclingLoader — OCR disabled, NO RapidOCR
-                # ---------------------------------------------------------
-                loader = DoclingLoader(
-                    temp_path,
-                    export_type=ExportType.MARKDOWN,
-                    pipeline_options={
-                        "do_ocr": False,
-                        "do_table_structure": True,
-                        "do_layout": True,
-                    }
-                )
-
-                try:
-                    docs = loader.load()
-                    resume_markdown = docs[0].page_content
-                    st.markdown(resume_markdown)
-
-                except Exception as e:
-                    st.error(f"Error loading document: {e}")
-                    st.stop()
-
-
-            with st.spinner("Generating Insights..."):
-                llm = ChatGoogleGenerativeAI(
-                    model="gemini-2.5-flash-lite",
-                    temperature=0,
-                    google_api_key=settings.google_api_key,
-                )
-
-                structured_llm = llm.with_structured_output(schema=Profile)
-                response = structured_llm.invoke(resume_markdown)
-
-            data = response.model_dump()
-
-            # DISPLAY SECTIONS
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">👤 Personal Details</div>
-                <p><b>Name:</b> {data.get('fullname')}</p>
-                <p><b>Email:</b> {data.get('email_id')}</p>
-                <p><b>Phone:</b> {data.get('phone_number')}</p>
-                <p><b>Designation:</b> {data.get('designation')}</p>
-                <p><b>Location:</b> {data.get('current_location')}</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # --- SKILLS ---
-            tech = data["technical_skills"][0]
-
-            def chip(items):
-                return "".join(
-                    [f"<span style='background:#e0e7ff;padding:6px 12px;margin:4px;border-radius:8px;display:inline-block;'>{x}</span>"
-                     for x in items]
-                )
-
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">💻 Programming Languages</div>
-                {chip(tech["programming_languages"])}
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">💻 Libraries or Frameworks</div>
-                {chip(tech["libraries_or_frameworks"])}
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">💻 Other Tools</div>
-                {chip(tech["other_tools"])}
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">🤝 Interpersonal Skills</div>
-                {chip(data["interpersonal_skills"])}
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Experience Section
-            st.markdown(f"""
-            <div class="box">
-                <div class="title">👩🏻‍💻 Working Details</div>
-                <p><b>Experience:</b> {data.get('year_of_experience')}</p>
-                <p><b>Current CTC:</b> {data.get('current_ctc')}</p>
-                <p><b>Expected CTC:</b> {data.get('expected_ctc')}</p>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.session_state["resume_data"] = data
-            os.remove(temp_path)
-
-    if "resume_data" in st.session_state:
-        if st.button("Save"):
-            data = st.session_state["resume_data"]
-
-            tech = data["technical_skills"][0]
-            data["skills"] = list(set(
-                tech["programming_languages"] +
-                tech["libraries_or_frameworks"] +
-                tech["other_tools"]
-            ))
-
-            df_new = pd.DataFrame([data])
-
-            if os.path.exists(csv_file):
-                df = pd.read_csv(csv_file)
-
-                if not df[df['email_id'] == data['email_id']].empty:
-                    show_overwrite_dialog(data['email_id'], data, csv_file)
-                else:
-                    df_new.to_csv(csv_file, mode='a', header=False, index=False)
-                    st.success("Saved successfully!")
-                    st.rerun()
-            else:
-                df_new.to_csv(csv_file, index=False)
-                st.success("Saved successfully!")
-                st.rerun()
-
+        st.success("Saved Successfully!")
 
 # =======================  TAB 2 FILTERING  ===============================
 
@@ -674,6 +554,7 @@ with tab2:
         filtered_df = df
 
     st.dataframe(filtered_df)
+
 
 
 
