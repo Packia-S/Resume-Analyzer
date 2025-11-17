@@ -14,9 +14,7 @@ import os
 import docling
 import pandas as pd
 from dotenv import load_dotenv
-import pkg_resources
 
-st.write("Docling Version: ", pkg_resources.get_distribution("langchain-docling").version)
 load_dotenv()
 
 icon = Image.open("logo.png")
@@ -421,6 +419,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
