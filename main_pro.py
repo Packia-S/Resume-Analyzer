@@ -118,7 +118,6 @@ with tab1:
                     temp_path,
                     export_type=ExportType.MARKDOWN,
                     pipeline_options={"do_ocr": False}
-
                 )
                 docs = loader.load()
                 resume_markdown = docs[0].page_content
@@ -427,6 +426,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
