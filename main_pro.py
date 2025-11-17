@@ -2,7 +2,7 @@ import os
 
 # FIX: Prevent HuggingFace from creating symlinks on Windows
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
-
+os.environ["DOC_LING_DISABLE_OCR"] = "1"
 import streamlit as st
 from PIL import Image
 from langchain_docling import DoclingLoader
@@ -99,21 +99,29 @@ with tab1:
 
         if st.button("Convert"):
             with st.spinner("Extracting Information..."):
-                temp_path = f"temp_{uploaded_file.name}"
+                temp_path = "uploaded_resume." + uploaded_file.name.split(".")[-1]
+            
                 with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.read())
-                
-                
-                # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
+                    f.write(uploaded_file.getbuffer())
+            
+                # Docling loader WITHOUT OCR
                 loader = DoclingLoader(
-                    file_path=temp_path,
-                 
-                    export_type=ExportType.MARKDOWN
+                    temp_path,
+                    export_type=ExportType.MARKDOWN,
+                    pipeline_options={
+                        "do_ocr": False,              # disable OCR
+                        "do_table_structure": True,
+                        "do_layout": True,
+                    }
                 )
-
-                docs = loader.load()
-                resume_text = docs[0].page_content
-               
+            
+                try:
+                    docs = loader.load()
+                    resume_markdown = docs[0].page_content
+                    st.markdown(resume_markdown)
+            
+                except Exception as e:
+                    st.error(f"Error loading document: {e}")
 
 
             with st.spinner("Generating Insights..."):
@@ -413,6 +421,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
