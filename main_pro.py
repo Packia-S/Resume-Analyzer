@@ -109,7 +109,7 @@ with tab1:
                     file_path=temp_path,
                  
                     export_type=ExportType.MARKDOWN,
-                    pipeline_options = {"do_ocr": False}
+                    do_ocrn= False
                 )
 
                 docs = loader.load()
@@ -414,6 +414,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
