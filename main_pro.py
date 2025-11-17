@@ -108,7 +108,8 @@ with tab1:
                 loader = DoclingLoader(
                     file_path=temp_path,
                  
-                    export_type=ExportType.MARKDOWN
+                    export_type=ExportType.MARKDOWN,
+                    pipeline_options = {"do_ocr": False}
                 )
 
                 docs = loader.load()
@@ -413,6 +414,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
