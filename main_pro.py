@@ -88,6 +88,9 @@ tab1, tab2 = st.tabs(
 
 csv_file = "resume_output.csv"
 
+os.environ["DOCLING_DISABLE_OCR"] = "1"
+os.environ["RAPIDOCR_HOME"] = "/mount/src/ocr_models"  # safe location
+
 with tab1:
     st.header("Upload Resume")
     uploaded_file = st.file_uploader(
@@ -101,14 +104,17 @@ with tab1:
             with st.spinner("Extracting Information..."):
                 temp_path = f"temp_{uploaded_file.name}"
                 with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.read())
+                    f.write(uploaded_file.getbuffer())
                 
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 loader = DoclingLoader(
-                    file_path=temp_path,
-                 
-                    export_type=ExportType.MARKDOWN
+                    temp_path,
+                    export_type=ExportType.MARKDOWN,
+                    pipeline_options={
+                        "do_ocr": False,
+                        "ocr_engine": None
+                    }
                 )
 
                 docs = loader.load()
@@ -413,6 +419,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
