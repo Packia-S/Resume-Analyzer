@@ -522,34 +522,33 @@ with tab1:
         if st.button("Convert"):
             with st.spinner("Extracting Information..."):
                 
-                # Save uploaded file to a temp path
-                ext = uploaded_file.name.split(".")[-1]
-                temp_path = f"uploaded_resume.{ext}"
+                temp_path = "uploaded_resume." + uploaded_file.name.split(".")[-1]
 
                 with open(temp_path, "wb") as f:
                     f.write(uploaded_file.getbuffer())
 
-                # --- FIXED DOCLING LOADER (OCR DISABLED) ---
+                # ---------------------------------------------------------
+                # 🔥 Fixed DoclingLoader — OCR disabled, NO RapidOCR
+                # ---------------------------------------------------------
                 loader = DoclingLoader(
                     temp_path,
                     export_type=ExportType.MARKDOWN,
                     pipeline_options={
+                        "do_ocr": False,
                         "do_table_structure": True,
-                        "do_layout": True
-                        # DO NOT PUT "do_ocr" HERE → IGNORED BY DOCLING
+                        "do_layout": True,
                     }
                 )
 
                 try:
                     docs = loader.load()
-                    resume_text = docs[0].page_content
-                    st.markdown(resume_text)
+                    resume_markdown = docs[0].page_content
+                    st.markdown(resume_markdown)
 
                 except Exception as e:
                     st.error(f"Error loading document: {e}")
                     st.stop()
 
-            # ------- LLM PARSING ---------
 
             with st.spinner("Generating Insights..."):
                 llm = ChatGoogleGenerativeAI(
@@ -559,7 +558,7 @@ with tab1:
                 )
 
                 structured_llm = llm.with_structured_output(schema=Profile)
-                response = structured_llm.invoke(resume_text)
+                response = structured_llm.invoke(resume_markdown)
 
             data = response.model_dump()
 
@@ -675,6 +674,7 @@ with tab2:
         filtered_df = df
 
     st.dataframe(filtered_df)
+
 
 
 
