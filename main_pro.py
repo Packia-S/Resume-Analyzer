@@ -109,11 +109,13 @@ with tab1:
                 
                 # loader = DoclingLoader(file_path=temp_path, export_type=ExportType.MARKDOWN)
                 loader = DoclingLoader(
-                    temp_path,
+                    file_path = temp_path,
                     export_type=ExportType.MARKDOWN,
                     pipeline_options={
                         "do_ocr": False,
-                        "ocr_engine": None
+                        "ocr_engine": None,
+                        "do_table_structure": True,
+                        "do_layout": True,
                     }
                 )
 
@@ -419,6 +421,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
