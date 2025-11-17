@@ -118,7 +118,7 @@ with tab1:
                     resume_markdown = docs[0].page_content
                 
                 except Exception as e:
-                    show_error(e)
+                    # show_error(e)
                     st.error("An internal error occurred.")
 
 
@@ -424,6 +424,7 @@ with tab2:
 
 #                 st.success("Your data has been submitted successfully.")
 #                 st.rerun()
+
 
 
 
