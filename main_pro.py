@@ -583,6 +583,46 @@ with tab1:
             </div>
             """, unsafe_allow_html=True)
 
+          
+            st.markdown(f"""
+            <div class="box">
+                <div class="title">👩🏻‍💻 Working Details</div>
+                <p><b>Year of Experience:</b> {data.get('year_of_experience')}</p>
+                <p><b>Current CTC:</b> {data.get('current_ctc')}</p>
+                <p><b>Current Company:</b> {data.get('current_company')}</p>
+                <p><b>Expected CTC:</b> {data.get('expected_ctc')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="box">
+                <div class="title">🌐 Links</div>
+                <p><b>LinkedIn URL:</b> {data.get('linkedin_url')}</p>
+                <p><b>GitHub URL:</b> {data.get('github_url')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown(f"""
+            <div class="box">
+                <div class="title">📄 Certifications</div>
+                <p><b>Certifications:</b> {data.get('certifications')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            st.markdown(f"""
+            <div class="box">
+                <div class="title">📃 Summary</div>
+                <p><b>Summary:</b> {data.get('summary')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+  
+            st.markdown(f"""
+            <div class="box">
+                <div class="title">👩‍💻 Portfolio </div>
+                <p><b>Portfolio Project URL:</b> {data.get('portfolio_project_url')}</p>
+            </div>
+            """, unsafe_allow_html=True)
+
             st.session_state["resume_data"] = data
             os.remove(temp_path)
 
@@ -621,6 +661,7 @@ with tab2:
   else:
     st.info("The `resume_output.csv` file has not been created yet. Please upload and save a resume in the 'Resume Upload' tab first.")
         # st.dataframe(filtered_df)
+
 
 
 
